@@ -14,6 +14,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
         $this->mockApplication();
+
+        $this->setupTestDbData();
     }
 
     protected function tearDown()
@@ -33,6 +35,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
             'id' => 'testapp',
             'basePath' => __DIR__,
             'vendorPath' => $this->getVendorPath(),
+            'components' => [
+                'db' => [
+                    'class' => 'yii\db\Connection',
+                    'dsn' => 'sqlite::memory:',
+                ],
+            ],
         ], $config));
     }
 
@@ -50,5 +58,58 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function destroyApplication()
     {
         Yii::$app = null;
+    }
+
+    /**
+     * Setup tables for test ActiveRecord
+     */
+    protected function setupTestDbData()
+    {
+        $db = Yii::$app->getDb();
+
+        // Structure :
+
+        $table = 'Item';
+        $columns = [
+            'id' => 'pk',
+            'name' => 'string',
+        ];
+        $db->createCommand()->createTable($table, $columns)->execute();
+
+        $table = 'Language';
+        $columns = [
+            'id' => 'pk',
+            'name' => 'string',
+            'locale' => 'string',
+        ];
+        $db->createCommand()->createTable($table, $columns)->execute();
+
+        $table = 'ItemTranslation';
+        $columns = [
+            'itemId' => 'integer',
+            'languageId' => 'integer',
+            'title' => 'string',
+            'description' => 'string',
+            'PRIMARY KEY(itemId, languageId)'
+        ];
+        $db->createCommand()->createTable($table, $columns)->execute();
+
+        // Data :
+
+        $db->createCommand()->batchInsert('Language', ['name', 'locale'], [
+            ['English', 'en'],
+            ['German', 'de'],
+        ])->execute();
+
+        $db->createCommand()->batchInsert('Item', ['name'], [
+            ['item1'],
+            ['item2'],
+        ])->execute();
+
+        $db->createCommand()->batchInsert('ItemTranslation', ['itemId', 'languageId', 'title', 'description'], [
+            [1, 1, 'item1-en', 'item1-desc-en'],
+            [1, 2, 'item1-de', 'item1-desc-de'],
+            [2, 2, 'item2-de', 'item2-desc-de'],
+        ])->execute();
     }
 }
