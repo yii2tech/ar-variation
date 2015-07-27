@@ -1,0 +1,30 @@
+{
+    "name": "yii2tech/ar-variation",
+    "description": "Provides support for ActiveRecord variation via related models in Yii2",
+    "keywords": ["yii2", "active", "record", "variation", "variator", "translation", "i18n"],
+    "type": "yii2-extension",
+    "license": "BSD-3-Clause",
+    "support": {
+        "issues": "https://github.com/yii2tech/ar-variation/issues",
+        "forum": "http://www.yiiframework.com/forum/",
+        "wiki": "https://github.com/yii2tech/ar-variation/wiki",
+        "source": "https://github.com/yii2tech/ar-variation"
+    },
+    "authors": [
+        {
+            "name": "Paul Klimov",
+            "email": "klimov.paul@gmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "autoload": {
+        "psr-4": { "yii2tech\\ar\\variation\\": "" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
