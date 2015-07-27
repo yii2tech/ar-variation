@@ -60,6 +60,11 @@ class VariationBehavior extends Behavior
      */
     public $defaultVariationOptionReference;
 
+    /**
+     * @var \yii\db\ActiveQueryInterface[]|null list of all possible variation models.
+     */
+    private $_variationModels;
+
 
     /**
      * Declares has-one relation [[defaultVariationRelation]] from [[variationsRelation]] relation.
@@ -67,9 +72,7 @@ class VariationBehavior extends Behavior
      */
     public function hasDefaultVariationRelation()
     {
-        $relationMethod = 'get' . $this->variationsRelation;
-        /* @var $variationsRelation \yii\db\ActiveQueryInterface */
-        $variationsRelation = $this->owner->$relationMethod();
+        $variationsRelation = $this->getVariationsRelation();
         $variationsRelation->multiple = false;
         $variationsRelation->andWhere([$this->variationOptionReferenceAttribute => $this->getDefaultVariationOptionReference()]);
         return $variationsRelation;
@@ -99,6 +102,16 @@ class VariationBehavior extends Behavior
     }
 
     /**
+     * Returns the instance of the [[variationsRelation]] relation.
+     * @return \yii\db\ActiveQueryInterface|\yii\db\ActiveRelationTrait variations relation.
+     */
+    private function getVariationsRelation()
+    {
+        $relationMethod = 'get' . $this->variationsRelation;
+        return $this->owner->$relationMethod();
+    }
+
+    /**
      * @return \yii\db\BaseActiveRecord|null
      */
     private function findDefaultVariationModel()
@@ -115,6 +128,93 @@ class VariationBehavior extends Behavior
             }
         }
         return null;
+    }
+
+    /**
+     * Sets models related to the main one as variations.
+     * @param \yii\db\BaseActiveRecord[]|null $models variation models.
+     * @return $this self reference.
+     */
+    public function setVariationModels($models)
+    {
+        $this->_variationModels = $models;
+        return $this;
+    }
+
+    /**
+     * Returns models related to the main one as variations.
+     * This method adjusts set of related models creating missing variations.
+     * @return \yii\db\BaseActiveRecord[] list of variation models.
+     */
+    public function getVariationModels()
+    {
+        if (is_array($this->_variationModels)) {
+            return $this->_variationModels;
+        }
+
+        $variationModels = $this->owner->{$this->variationsRelation};
+
+        $variationModels = $this->adjustVariationModels($variationModels);
+        $this->_variationModels = $variationModels;
+        return $variationModels;
+    }
+
+    /**
+     * Adjusts given variation models to be adequate to the {@link variatorModelClassName} records.
+     * @param \yii\db\BaseActiveRecord[] $initialVariationModels set of initial variation models, found by relation
+     * @return \yii\db\BaseActiveRecord[] set of {@link CActiveRecord}
+     */
+    private function adjustVariationModels(array $initialVariationModels)
+    {
+        /* @var $optionModelClass \yii\db\BaseActiveRecord */
+        /* @var $options \yii\db\BaseActiveRecord[] */
+        $optionModelClass = $this->optionModelClass;
+        $options = $optionModelClass::find()->all();
+
+        $variationsRelation = $this->getVariationsRelation();
+
+        $optionReferenceAttribute = $this->variationOptionReferenceAttribute;
+        list($ownerReferenceAttribute) = array_keys($variationsRelation->link);
+
+        /* @var $variationModels \yii\db\BaseActiveRecord[] */
+        /* @var $confirmedInitialVariationModels \yii\db\BaseActiveRecord[] */
+        $variationModels = [];
+        $confirmedInitialVariationModels = [];
+        foreach ($options as $option) {
+            $matchFound = false;
+            foreach ($initialVariationModels as $initialVariationModel) {
+                if ($option->getPrimaryKey() == $initialVariationModel->$optionReferenceAttribute) {
+                    $variationModels[] = $initialVariationModel;
+                    $confirmedInitialVariationModels[] = $initialVariationModel;
+                    $matchFound = true;
+                    break;
+                }
+            }
+            if (!$matchFound) {
+                $variationClassName = $variationsRelation->modelClass;
+                $variationModel = new $variationClassName();
+                $variationModel->$optionReferenceAttribute = $option->getPrimaryKey();
+                $variationModel->$ownerReferenceAttribute = $this->owner->getPrimaryKey();
+                $variationModels[] = $variationModel;
+            }
+        }
+
+        if (count($confirmedInitialVariationModels) < count($initialVariationModels)) {
+            foreach ($initialVariationModels as $initialVariationModel) {
+                $matchFound = false;
+                foreach ($confirmedInitialVariationModels as $confirmedInitialVariationModel) {
+                    if ($confirmedInitialVariationModel->getPrimaryKey() == $initialVariationModel->getPrimaryKey()) {
+                        $matchFound = true;
+                        break;
+                    }
+                }
+                if (!$matchFound) {
+                    $initialVariationModel->delete();
+                }
+            }
+        }
+
+        return $variationModels;
     }
 
     // Property Access Extension:
