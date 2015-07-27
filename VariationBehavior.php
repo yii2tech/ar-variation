@@ -15,6 +15,7 @@ use yii\base\UnknownPropertyException;
  * VariationBehavior
  *
  * @property \yii\db\BaseActiveRecord $owner
+ * @property \yii\db\BaseActiveRecord[] $variationModels list of all possible variation models.
  *
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 1.0
