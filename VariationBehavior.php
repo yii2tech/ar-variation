@@ -12,7 +12,39 @@ use yii\base\InvalidConfigException;
 use yii\base\UnknownPropertyException;
 
 /**
- * VariationBehavior
+ * VariationBehavior provides support for ActiveRecord variation via related models.
+ *
+ * ```php
+ * class Item extends ActiveRecord
+ * {
+ *     public function behaviors()
+ *     {
+ *         return [
+ *             'translationBehavior' => [
+ *                 'class' => VariationBehavior::className(),
+ *                 'variationsRelation' => 'translations',
+ *                 'defaultVariationRelation' => 'defaultTranslation',
+ *                 'variationOptionReferenceAttribute' => 'languageId',
+ *                 'optionModelClass' => Language::className(),
+ *                 'defaultVariationOptionReference' => 1,
+ *                 'variationAttributeDefaultValueMap' => [
+ *                     'title' => 'name'
+ *                 ],
+ *             ],
+ *         ];
+ *     }
+ *
+ *     public function getTranslations()
+ *     {
+ *         return $this->hasMany(ItemTranslation::className(), ['itemId' => 'id']);
+ *     }
+ *
+ *     public function getDefaultTranslation()
+ *     {
+ *         return $this->hasDefaultVariationRelation();
+ *     }
+ * }
+ * ```
  *
  * @property \yii\db\BaseActiveRecord $owner
  * @property \yii\db\BaseActiveRecord[] $variationModels list of all possible variation models.

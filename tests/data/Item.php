@@ -20,7 +20,7 @@ class Item extends ActiveRecord
     public function behaviors()
     {
         return [
-            [
+            'translationBehavior' => [
                 'class' => VariationBehavior::className(),
                 'variationsRelation' => 'translations',
                 'defaultVariationRelation' => 'defaultTranslation',
