@@ -23,6 +23,8 @@ class VariationBehaviorTest extends TestCase
 
         $this->assertNotEmpty($item->title);
         $this->assertEmpty($item->defaultTranslation);
+        $this->assertNull($item->brief);
+        $this->assertEquals('default', $item->summary);
         $this->setExpectedException('yii\base\UnknownPropertyException');
         $item->description;
     }

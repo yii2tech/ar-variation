@@ -65,15 +65,20 @@ class VariationBehavior extends Behavior
      */
     public $defaultVariationRelation = 'variation';
     /**
-     * @var array map, which marks the attributes of main model, which should be a source for
-     * the default value for the variation model attributes.
-     * Format: variationModelAttributeName => mainModelAttributeName.
+     * @var array map, which marks the  a source for the default value for the variation model attributes.
+     * Format: variationModelAttributeName => valueSource.
+     * Each map value can be:
+     *  - null, - returns `null` as variation attribute value
+     *  - string, - returns value of the specified attribute from parent model as variation attribute value
+     *  - callable, - returns result of callback invocation as variation attribute value
      * For example:
      *
      * ```php
      * [
      *     'title' => 'name',
      *     'content' => 'defaultContent',
+     *     'brief' => null,
+     *     'summary' => function() {return Yii::t('app', 'Not available')},
      * ];
      * ```
      *
@@ -260,6 +265,26 @@ class VariationBehavior extends Behavior
         return $variationModels;
     }
 
+    /**
+     * @param string $name variation attribute name.
+     * @return mixed|null attribute value.
+     * @throws InvalidConfigException on invalid attribute map.
+     */
+    private function fetchVariationAttributeDefaultValue($name)
+    {
+        $default = $this->variationAttributeDefaultValueMap[$name];
+        if ($default === null) {
+            return null;
+        }
+        if (!is_scalar($default)) {
+            if (!is_callable($default)) {
+                throw new InvalidConfigException("Default value map for '{$name}' should be a scalar or valid callback.");
+            }
+            return call_user_func($default, $this->owner);
+        }
+        return $this->owner->{$default};
+    }
+
     // Property Access Extension:
 
     /**
@@ -278,12 +303,12 @@ class VariationBehavior extends Behavior
             $model = $this->getDefaultVariationModel();
             if (is_object($model) && $model->hasAttribute($name)) {
                 $result = $model->$name;
-                if (empty($result) && isset($this->variationAttributeDefaultValueMap[$name])) {
-                    return $this->owner->{$this->variationAttributeDefaultValueMap[$name]};
+                if (empty($result) && array_key_exists($name, $this->variationAttributeDefaultValueMap)) {
+                    return $this->fetchVariationAttributeDefaultValue($name);
                 }
                 return $result;
-            } elseif (isset($this->variationAttributeDefaultValueMap[$name])) {
-                return $this->owner->{$this->variationAttributeDefaultValueMap[$name]};
+            } elseif (array_key_exists($name, $this->variationAttributeDefaultValueMap)) {
+                return $this->fetchVariationAttributeDefaultValue($name);
             }
 
             throw $exception;
@@ -319,7 +344,7 @@ class VariationBehavior extends Behavior
         if (parent::canGetProperty($name, $checkVars, $checkBehaviors)) {
             return true;
         }
-        if (isset($this->variationAttributeDefaultValueMap[$name])) {
+        if (array_key_exists($name, $this->variationAttributeDefaultValueMap)) {
             return true;
         }
         $model = $this->getDefaultVariationModel();

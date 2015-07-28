@@ -28,7 +28,9 @@ class Item extends ActiveRecord
                 'optionModelClass' => Language::className(),
                 'defaultVariationOptionReference' => 1,
                 'variationAttributeDefaultValueMap' => [
-                    'title' => 'name'
+                    'title' => 'name',
+                    'brief' => null,
+                    'summary' => function() {return 'default';},
                 ],
             ],
         ];
