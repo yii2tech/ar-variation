@@ -9,7 +9,9 @@ namespace yii2tech\ar\variation;
 
 use yii\base\Behavior;
 use yii\base\InvalidConfigException;
+use yii\base\Model;
 use yii\base\UnknownPropertyException;
+use yii\db\BaseActiveRecord;
 
 /**
  * VariationBehavior provides support for ActiveRecord variation via related models.
@@ -193,6 +195,14 @@ class VariationBehavior extends Behavior
     }
 
     /**
+     * @return boolean whether the variation models have been initialized or not.
+     */
+    public function getIsVariationModelsInitialized()
+    {
+        return !empty($this->_variationModels);
+    }
+
+    /**
      * Adjusts given variation models to be adequate to the {@link variatorModelClassName} records.
      * @param \yii\db\BaseActiveRecord[] $initialVariationModels set of initial variation models, found by relation
      * @return \yii\db\BaseActiveRecord[] set of {@link CActiveRecord}
@@ -326,5 +336,58 @@ class VariationBehavior extends Behavior
         }
         $model = $this->getDefaultVariationModel();
         return is_object($model) && $model->hasAttribute($name);
+    }
+
+    // Events :
+
+    /**
+     * @inheritdoc
+     */
+    public function events()
+    {
+        return [
+            Model::EVENT_AFTER_VALIDATE => 'afterValidate',
+            BaseActiveRecord::EVENT_AFTER_INSERT => 'afterSave',
+            BaseActiveRecord::EVENT_AFTER_UPDATE => 'afterSave',
+        ];
+    }
+
+    /**
+     * Handles owner 'afterValidate' event, ensuring variation models are validated as well
+     * in case they have been fetched.
+     * @param \yii\base\Event $event event instance.
+     */
+    public function afterValidate($event)
+    {
+        if (!$this->getIsVariationModelsInitialized()) {
+            return;
+        }
+        $variationModels = $this->getVariationModels();
+        foreach ($variationModels as $variationModel) {
+            if (!$variationModel->validate()) {
+                $this->owner->addErrors($variationModel->getErrors());
+            }
+        }
+    }
+
+    /**
+     * Handles owner 'afterInsert' and 'afterUpdate' events, ensuring variation models are saved
+     * in case they have been fetched before.
+     * @param \yii\base\Event $event event instance.
+     */
+    public function afterSave($event)
+    {
+        if (!$this->getIsVariationModelsInitialized()) {
+            return;
+        }
+
+        $variationsRelation = $this->getVariationsRelation();
+        list($ownerReferenceAttribute) = array_keys($variationsRelation->link);
+
+        $variationModels = $this->getVariationModels();
+        foreach ($variationModels as $variationModel) {
+            $variationModel->{$ownerReferenceAttribute} = $this->owner->getPrimaryKey();
+            $variationModel->save(false);
+        }
     }
 }

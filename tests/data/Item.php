@@ -43,6 +43,16 @@ class Item extends ActiveRecord
     }
 
     /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            ['name', 'required'],
+        ];
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getTranslations()

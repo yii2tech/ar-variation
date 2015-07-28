@@ -19,4 +19,16 @@ class ItemTranslation extends ActiveRecord
     {
         return 'ItemTranslation';
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            ['title', 'required'],
+            ['description', 'required'],
+            ['languageId', 'required'],
+        ];
+    }
 }

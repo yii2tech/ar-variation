@@ -48,4 +48,46 @@ class VariationBehaviorTest extends TestCase
         $this->assertTrue($variationModels[0]->isNewRecord);
         $this->assertFalse($variationModels[1]->isNewRecord);
     }
+
+    /**
+     * @depends testGetVariationModels
+     */
+    public function testValidate()
+    {
+        /* @var $item Item|VariationBehavior */
+
+        $item = new Item();
+        $item->name = 'new item';
+        $this->assertTrue($item->validate());
+
+        $variationModels = $item->getVariationModels();
+        $this->assertFalse($item->validate());
+
+        foreach ($variationModels as $variationModel) {
+            $variationModel->title = 'new title';
+            $variationModel->description = 'new description';
+        }
+        $this->assertTrue($item->validate());
+    }
+
+    /**
+     * @depends testGetVariationModels
+     */
+    public function testSave()
+    {
+        /* @var $item Item|VariationBehavior */
+
+        $item = new Item();
+        $item->name = 'new item';
+
+        foreach ($item->getVariationModels() as $variationModel) {
+            $variationModel->title = 'new title';
+            $variationModel->description = 'new description';
+        }
+
+        $item->save(false);
+
+        $item = Item::findOne($item->id);
+        $this->assertCount(2, $item->translations);
+    }
 }

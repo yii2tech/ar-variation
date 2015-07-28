@@ -207,10 +207,8 @@ class ConfigController extends Controller
 
         $models = array_merge([$model, $model->getVariationModels()]);
 
-        if (Model::loadMultiple($models, Yii::$app->request->post()) && Model::validateMultiple($models)) {
-            foreach ($models as $model) {
-                $model->save(false);
-            }
+        $post = Yii::$app->request->post();
+        if ($model->load($post) && Model::loadMultiple($model->getVariationModels(), $post) && $model->save()) {
             return $this->redirect(['index']);
         }
 
@@ -221,7 +219,11 @@ class ConfigController extends Controller
 }
 ```
 
-The main view file can be following:
+Note that variation models should be populated with data from request manually, but they will be validated and saved
+automatically - you don't need to do this manually. Automatic processing of variation models will be performed only, if
+they have been fetched before owner validation or saving triggered. Thus it will not affect pure owner validation or saving.
+
+The form view file can be following:
 
 ```php
 <?php
@@ -237,8 +239,8 @@ use yii\widgets\ActiveForm;
 <?= $form->field($model, 'price'); ?>
 
 <?php foreach ($model->getVariationModels() as $variationModel): ?>
-    <?= $form->field($variationModel, 'title'); ?>
-    <?= $form->field($variationModel, 'description'); ?>
+    <?= $form->field($variationModel, 'title')->label('Title on ' . $variationModel->languageId); ?>
+    <?= $form->field($variationModel, 'description')->label('Description on ' . $variationModel->languageId); ?>
 <?php endforeach;?>
 
 <div class="form-group">
