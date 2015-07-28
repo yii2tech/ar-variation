@@ -6,7 +6,7 @@ In particular it allows implementing i18n feature for ActiveRecord.
 
 For license information check the [LICENSE](LICENSE.md)-file.
 
-[![Latest Stable Version](https://poser.pugx.org/ar-variation/ar-variation/v/stable.png)](https://packagist.org/packages/yii2tech/ar-variation)
+[![Latest Stable Version](https://poser.pugx.org/yii2tech/ar-variation/v/stable.png)](https://packagist.org/packages/yii2tech/ar-variation)
 [![Total Downloads](https://poser.pugx.org/yii2tech/ar-variation/downloads.png)](https://packagist.org/packages/yii2tech/ar-variation)
 [![Build Status](https://travis-ci.org/yii2tech/ar-variation.svg?branch=master)](https://travis-ci.org/yii2tech/ar-variation)
 
