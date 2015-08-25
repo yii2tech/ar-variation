@@ -42,7 +42,7 @@ be provided on several different languages. In relational database there will be
 one for the item and second - for the item translation, which have item id and language id along with actual title
 and description. A DDL for such solution will be following:
 
-```mysql
+```sql
 CREATE TABLE `Item`
 (
    `id` integer NOT NULL AUTO_INCREMENT,
@@ -54,7 +54,7 @@ CREATE TABLE `Item`
 CREATE TABLE `ItemTranslation`
 (
    `itemId` integer NOT NULL,
-   `languageId` integer NOT NULL,
+   `languageId` varchar(5) NOT NULL,
    `title` varchar(64) NOT NULL,
    `description` TEXT,
     PRIMARY KEY (`itemId`, `languageId`)
@@ -66,8 +66,8 @@ CREATE TABLE `ItemTranslation`
 Usually in most cases there is no need for 'Item' to know about all its translations - it is enough to fetch
 only one, which is used as web application interface language.
 
-This extension porvides [[\yii2tech\ar\variation\VariationBehavior]] ActiveRecord behavior for such solution
-support in Yii2. You'll have to craete an ActiveRecord class for 'Language', 'Item' and 'ItemTranslation' and
+This extension provides [[\yii2tech\ar\variation\VariationBehavior]] ActiveRecord behavior for such solution
+support in Yii2. You'll have to create an ActiveRecord class for 'Language', 'Item' and 'ItemTranslation' and
 attach [[\yii2tech\ar\variation\VariationBehavior]] in the following way:
 
 ```php
@@ -205,8 +205,6 @@ class ConfigController extends Controller
     {
         $model = new Item();
 
-        $models = array_merge([$model, $model->getVariationModels()]);
-
         $post = Yii::$app->request->post();
         if ($model->load($post) && Model::loadMultiple($model->getVariationModels(), $post) && $model->save()) {
             return $this->redirect(['index']);
@@ -238,9 +236,9 @@ use yii\widgets\ActiveForm;
 <?= $form->field($model, 'name'); ?>
 <?= $form->field($model, 'price'); ?>
 
-<?php foreach ($model->getVariationModels() as $variationModel): ?>
-    <?= $form->field($variationModel, 'title')->label('Title on ' . $variationModel->languageId); ?>
-    <?= $form->field($variationModel, 'description')->label('Description on ' . $variationModel->languageId); ?>
+<?php foreach ($model->getVariationModels() as $index => $variationModel): ?>
+    <?= $form->field($variationModel, "[{$index}]title")->label($variationModel->getAttributeLabel('title') . ' (' . $variationModel->languageId . ')'); ?>
+    <?= $form->field($variationModel, "[{$index}]description")->label($variationModel->getAttributeLabel('description') . ' (' . $variationModel->languageId . ')'); ?>
 <?php endforeach;?>
 
 <div class="form-group">
