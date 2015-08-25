@@ -48,8 +48,8 @@ use yii\db\BaseActiveRecord;
  * }
  * ```
  *
- * @property \yii\db\BaseActiveRecord $owner
- * @property \yii\db\BaseActiveRecord[] $variationModels list of all possible variation models.
+ * @property BaseActiveRecord $owner
+ * @property BaseActiveRecord[] $variationModels list of all possible variation models.
  *
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 1.0
@@ -339,9 +339,9 @@ class VariationBehavior extends Behavior
     /**
      * @inheritdoc
      */
-    public function canGetProperty($name, $checkVars = true, $checkBehaviors = true)
+    public function canGetProperty($name, $checkVars = true)
     {
-        if (parent::canGetProperty($name, $checkVars, $checkBehaviors)) {
+        if (parent::canGetProperty($name, $checkVars)) {
             return true;
         }
         if (array_key_exists($name, $this->variationAttributeDefaultValueMap)) {
@@ -354,9 +354,9 @@ class VariationBehavior extends Behavior
     /**
      * @inheritdoc
      */
-    public function canSetProperty($name, $checkVars = true, $checkBehaviors = true)
+    public function canSetProperty($name, $checkVars = true)
     {
-        if (parent::canSetProperty($name, $checkVars, $checkBehaviors)) {
+        if (parent::canSetProperty($name, $checkVars)) {
             return true;
         }
         $model = $this->getDefaultVariationModel();
