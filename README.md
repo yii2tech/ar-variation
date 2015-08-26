@@ -131,7 +131,7 @@ echo $item->title; // equal to `$item->defaultTranslation->title`
 echo $item->description; // equal to `$item->defaultTranslation->description`
 ```
 
-If it could be the main entiry don't have a variation for particular option, you can use [[\yii2tech\ar\variation\VariationBehavior::variationAttributeDefaultValueMap]]
+If it could be the main entity don't have a variation for particular option, you can use [[\yii2tech\ar\variation\VariationBehavior::variationAttributeDefaultValueMap]]
 to provide the default value for the variation fields as it was done for 'title' in the above example:
 
 ```php
@@ -141,7 +141,7 @@ echo $item->title; // outputs 'new item'
 ```
 
 
-## Quering variations <span id="quering-variations"></span>
+## Querying variations <span id="querying-variations"></span>
 
 As it has been already said [[\yii2tech\ar\variation\VariationBehavior]] works through relations. Thus, in order to make
 variation attributes feature work, it will perform an extra query to retrieve the default variation model, which may

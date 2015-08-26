@@ -16,6 +16,8 @@ use yii\db\BaseActiveRecord;
 /**
  * VariationBehavior provides support for ActiveRecord variation via related models.
  *
+ * Configuration example:
+ *
  * ```php
  * class Item extends ActiveRecord
  * {
