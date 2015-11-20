@@ -210,7 +210,7 @@ class ConfigController extends Controller
             return $this->redirect(['index']);
         }
 
-        $this->render('index', [
+        return $this->render('index', [
             'model' => $model,
         ]);
     }
