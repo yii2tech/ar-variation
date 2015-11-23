@@ -116,12 +116,15 @@ class Item extends ActiveRecord
 Pay attention to the fact behavior is working through the 'has many' relation declared in the main ActiveRecord to
 the variation ActiveRecord. In the above example it will be relation 'translations'. You also have to declare default
 variation relation as 'has one', this can be easily done via [[\yii2tech\ar\variation\VariationBehavior::hasDefaultVariationRelation()]]
-method. Such relation inherits all infomation from the source one and applies extra condition on variation option reference,
-which is determined by [[\yii2tech\ar\variation\VariationBehavior::defaultVariationOptionReference]].
+method. Such relation inherits all information from the source one and applies extra condition on variation option reference,
+which is determined by [[\yii2tech\ar\variation\VariationBehavior::defaultVariationOptionReference]]. This reference should
+provide default value, which matches value of [[\yii2tech\ar\variation\VariationBehavior::variationOptionReferenceAttribute]] of
+the variation entity.
 
 
 ## Accessing variation attributes <span id="accessing-variation-attributes"></span>
 
+Having `defaultVariationRelation` is important for the usage of the variation attributes.
 Being applied [[\yii2tech\ar\variation\VariationBehavior]] allows access to the variation fields as they were
 the main one:
 
@@ -145,7 +148,7 @@ echo $item->title; // outputs 'new item'
 
 As it has been already said [[\yii2tech\ar\variation\VariationBehavior]] works through relations. Thus, in order to make
 variation attributes feature work, it will perform an extra query to retrieve the default variation model, which may
-produce performace impact in case you are working with several models.
+produce performance impact in case you are working with several models.
 In order to reduce number of queries you may use `with()` on the default variation relation:
 
 ```php
@@ -210,7 +213,7 @@ class ConfigController extends Controller
             return $this->redirect(['index']);
         }
 
-        $this->render('index', [
+        return $this->render('index', [
             'model' => $model,
         ]);
     }
@@ -239,7 +242,7 @@ use yii\widgets\ActiveForm;
 <?php foreach ($model->getVariationModels() as $index => $variationModel): ?>
     <?= $form->field($variationModel, "[{$index}]title")->label($variationModel->getAttributeLabel('title') . ' (' . $variationModel->languageId . ')'); ?>
     <?= $form->field($variationModel, "[{$index}]description")->label($variationModel->getAttributeLabel('description') . ' (' . $variationModel->languageId . ')'); ?>
-<?php endforeach;?>
+<?php endforeach; ?>
 
 <div class="form-group">
     <?= Html::submitButton('Save', ['class' => 'btn btn-primary']) ?>
