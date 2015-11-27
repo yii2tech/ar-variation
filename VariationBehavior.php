@@ -97,6 +97,12 @@ class VariationBehavior extends Behavior
      */
     public $optionModelClass;
     /**
+     * @var mixed|callable additional filter to be applied to the DB query used to find [[optionModelClass]] instances.
+     * This could be a callable with the signature `function (\yii\db\QueryInterface $query)`, or a direct filter condition
+     * for the [[\yii\db\QueryInterface::where()]] method.
+     */
+    public $optionQueryFilter;
+    /**
      * @var mixed|callable callback for the function, which should return default
      * variation option primary key id.
      */
@@ -232,10 +238,7 @@ class VariationBehavior extends Behavior
      */
     private function adjustVariationModels(array $initialVariationModels)
     {
-        /* @var $optionModelClass BaseActiveRecord */
-        /* @var $options BaseActiveRecord[] */
-        $optionModelClass = $this->optionModelClass;
-        $options = $optionModelClass::find()->all();
+        $options = $this->findOptionModels();
 
         $variationsRelation = $this->getVariationsRelation();
 
@@ -281,6 +284,25 @@ class VariationBehavior extends Behavior
         }
 
         return $variationModels;
+    }
+
+    /**
+     * Finds available variation option models.
+     * @return BaseActiveRecord[] option models list.
+     */
+    private function findOptionModels()
+    {
+        /* @var $optionModelClass BaseActiveRecord */
+        $optionModelClass = $this->optionModelClass;
+        $query = $optionModelClass::find();
+        if ($this->optionQueryFilter !== null) {
+            if (is_callable($this->optionQueryFilter)) {
+                call_user_func($this->optionQueryFilter, $query);
+            } else {
+                $query->andWhere($this->optionQueryFilter);
+            }
+        }
+        return $query->all();
     }
 
     /**

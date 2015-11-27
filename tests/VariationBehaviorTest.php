@@ -110,4 +110,27 @@ class VariationBehaviorTest extends TestCase
         $item = Item::findOne($item->id);
         $this->assertCount(2, $item->translations);
     }
+
+    /**
+     * @depends testGetVariationModels
+     */
+    public function testOptionQueryFilter()
+    {
+        /* @var $item Item|VariationBehavior */
+
+        $item = new Item();
+        $this->assertCount(2, $item->getVariationModels());
+
+        $item = new Item();
+        $item->optionQueryFilter = ['id' => 2];
+        $this->assertCount(1, $item->getVariationModels());
+        $this->assertEquals(2, $item->getVariationModels()[0]->languageId);
+
+        $item = new Item();
+        $item->optionQueryFilter = function ($query) {
+            $query->andWhere(['id' => 1]);
+        };
+        $this->assertCount(1, $item->getVariationModels());
+        $this->assertEquals(1, $item->getVariationModels()[0]->languageId);
+    }
 }
