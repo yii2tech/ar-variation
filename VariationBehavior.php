@@ -136,7 +136,7 @@ class VariationBehavior extends Behavior
     }
 
     /**
-     * @return \yii\db\BaseActiveRecord|null
+     * @return BaseActiveRecord|null
      */
     public function getDefaultVariationModel()
     {
@@ -154,7 +154,7 @@ class VariationBehavior extends Behavior
     }
 
     /**
-     * @return \yii\db\BaseActiveRecord|null
+     * @return BaseActiveRecord|null
      */
     private function findDefaultVariationModel()
     {
@@ -174,7 +174,7 @@ class VariationBehavior extends Behavior
 
     /**
      * Sets models related to the main one as variations.
-     * @param \yii\db\BaseActiveRecord[]|null $models variation models.
+     * @param BaseActiveRecord[]|null $models variation models.
      * @return $this self reference.
      */
     public function setVariationModels($models)
@@ -186,7 +186,7 @@ class VariationBehavior extends Behavior
     /**
      * Returns models related to the main one as variations.
      * This method adjusts set of related models creating missing variations.
-     * @return \yii\db\BaseActiveRecord[] list of variation models.
+     * @return BaseActiveRecord[] list of variation models.
      */
     public function getVariationModels()
     {
@@ -210,14 +210,14 @@ class VariationBehavior extends Behavior
     }
 
     /**
-     * Adjusts given variation models to be adequate to the {@link variatorModelClassName} records.
-     * @param \yii\db\BaseActiveRecord[] $initialVariationModels set of initial variation models, found by relation
-     * @return \yii\db\BaseActiveRecord[] set of {@link CActiveRecord}
+     * Adjusts given variation models to be adequate to the [[optionModelClass]] records.
+     * @param BaseActiveRecord[] $initialVariationModels set of initial variation models, found by relation
+     * @return BaseActiveRecord[] list of [[BaseActiveRecord]]
      */
     private function adjustVariationModels(array $initialVariationModels)
     {
-        /* @var $optionModelClass \yii\db\BaseActiveRecord */
-        /* @var $options \yii\db\BaseActiveRecord[] */
+        /* @var $optionModelClass BaseActiveRecord */
+        /* @var $options BaseActiveRecord[] */
         $optionModelClass = $this->optionModelClass;
         $options = $optionModelClass::find()->all();
 
@@ -226,8 +226,8 @@ class VariationBehavior extends Behavior
         $optionReferenceAttribute = $this->variationOptionReferenceAttribute;
         list($ownerReferenceAttribute) = array_keys($variationsRelation->link);
 
-        /* @var $variationModels \yii\db\BaseActiveRecord[] */
-        /* @var $confirmedInitialVariationModels \yii\db\BaseActiveRecord[] */
+        /* @var $variationModels BaseActiveRecord[] */
+        /* @var $confirmedInitialVariationModels BaseActiveRecord[] */
         $variationModels = [];
         $confirmedInitialVariationModels = [];
         foreach ($options as $option) {
