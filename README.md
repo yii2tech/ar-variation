@@ -190,6 +190,31 @@ class Item extends ActiveRecord
 ```
 
 
+## Access particular variation <span id="access-particular-variation"></span>
+
+You can always access default variation model via `getDefaultVariationModel()` method:
+
+```php
+$item = Item::findOne(1);
+$variationModel = $item->getDefaultVariationModel(); // get default variation instance
+echo $item->defaultVariationModel->title; // default variation is also available as virtual property
+```
+
+However, in some cases there is a need of accessing particular variation, but not default one.
+This can be done via `getVariationModel()` method:
+
+```php
+$item = Item::findOne(1);
+$frenchTranslation = $item->getVariationModel('fr');
+$russianTranslation = $item->getVariationModel('ru');
+```
+
+> Note: method `getVariationModel()` will load [[\yii2tech\ar\variation\VariationBehavior::variationsRelation]] relation
+  fully, which may reduce performance. You should always prefer usage of [[getDefaultVariationModel()]] method if possible.
+  You may also use eager loading for `variationsRelation` with extra condition filtering the results in order to save
+  performance.
+
+
 ## Creating variation setup web interface <span id="creating-variation-setup-web-interface"></span>
 
 Usage of [[\yii2tech\ar\variation\VariationBehavior]] simplifies management of variations and creating a web interface

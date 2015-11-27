@@ -54,6 +54,24 @@ class VariationBehaviorTest extends TestCase
     /**
      * @depends testGetVariationModels
      */
+    public function testGetVariationModel()
+    {
+        /* @var $item Item|VariationBehavior */
+
+        $item = Item::findOne(1);
+
+        $variationModel = $item->getVariationModel(1);
+        $this->assertTrue(is_object($variationModel));
+        $this->assertEquals(1, $variationModel->languageId);
+
+        $variationModel = $item->getVariationModel(2);
+        $this->assertTrue(is_object($variationModel));
+        $this->assertEquals(2, $variationModel->languageId);
+    }
+
+    /**
+     * @depends testGetVariationModels
+     */
     public function testValidate()
     {
         /* @var $item Item|VariationBehavior */

@@ -210,6 +210,22 @@ class VariationBehavior extends Behavior
     }
 
     /**
+     * Returns variation model, matching given option primary key.
+     * Note: this method will load [[variationsRelation]] relation fully.
+     * @param mixed $optionPk option entity primary key.
+     * @return BaseActiveRecord|null variation model.
+     */
+    public function getVariationModel($optionPk)
+    {
+        foreach ($this->getVariationModels() as $model) {
+            if ($model->{$this->variationOptionReferenceAttribute} == $optionPk) {
+                return $model;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Adjusts given variation models to be adequate to the [[optionModelClass]] records.
      * @param BaseActiveRecord[] $initialVariationModels set of initial variation models, found by relation
      * @return BaseActiveRecord[] list of [[BaseActiveRecord]]
