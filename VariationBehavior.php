@@ -164,14 +164,16 @@ class VariationBehavior extends Behavior
      */
     private function findDefaultVariationModel()
     {
-        if ($this->owner->isRelationPopulated($this->defaultVariationRelation) || !$this->owner->isRelationPopulated($this->variationsRelation)) {
-            return $this->owner->{$this->defaultVariationRelation};
-        } else {
-            $defaultOptionReference = $this->getDefaultVariationOptionReference();
-            foreach ($this->owner->{$this->variationsRelation} as $model) {
-                if ($model->{$this->variationOptionReferenceAttribute} == $defaultOptionReference) {
-                    $this->owner->populateRelation($this->defaultVariationRelation, $model);
-                    return $model;
+        if ($this->defaultVariationRelation !== null) {
+            if ($this->owner->isRelationPopulated($this->defaultVariationRelation) || !$this->owner->isRelationPopulated($this->variationsRelation)) {
+                return $this->owner->{$this->defaultVariationRelation};
+            } else {
+                $defaultOptionReference = $this->getDefaultVariationOptionReference();
+                foreach ($this->owner->{$this->variationsRelation} as $model) {
+                    if ($model->{$this->variationOptionReferenceAttribute} == $defaultOptionReference) {
+                        $this->owner->populateRelation($this->defaultVariationRelation, $model);
+                        return $model;
+                    }
                 }
             }
         }
