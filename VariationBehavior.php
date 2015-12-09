@@ -340,15 +340,17 @@ class VariationBehavior extends Behavior
         try {
             return parent::__get($name);
         } catch (UnknownPropertyException $exception) {
-            $model = $this->getDefaultVariationModel();
-            if (is_object($model) && $model->hasAttribute($name)) {
-                $result = $model->$name;
-                if (empty($result) && array_key_exists($name, $this->variationAttributeDefaultValueMap)) {
+            if ($this->owner !== null) {
+                $model = $this->getDefaultVariationModel();
+                if (is_object($model) && $model->hasAttribute($name)) {
+                    $result = $model->$name;
+                    if (empty($result) && array_key_exists($name, $this->variationAttributeDefaultValueMap)) {
+                        return $this->fetchVariationAttributeDefaultValue($name);
+                    }
+                    return $result;
+                } elseif (array_key_exists($name, $this->variationAttributeDefaultValueMap)) {
                     return $this->fetchVariationAttributeDefaultValue($name);
                 }
-                return $result;
-            } elseif (array_key_exists($name, $this->variationAttributeDefaultValueMap)) {
-                return $this->fetchVariationAttributeDefaultValue($name);
             }
 
             throw $exception;
@@ -367,12 +369,14 @@ class VariationBehavior extends Behavior
         try {
             parent::__set($name, $value);
         } catch (UnknownPropertyException $exception) {
-            $model = $this->getDefaultVariationModel();
-            if ($model->hasAttribute($name)) {
-                $model->$name = $value;
-            } else {
-                throw $exception;
+            if ($this->owner !== null) {
+                $model = $this->getDefaultVariationModel();
+                if ($model->hasAttribute($name)) {
+                    $model->$name = $value;
+                    return;
+                }
             }
+            throw $exception;
         }
     }
 
@@ -387,6 +391,9 @@ class VariationBehavior extends Behavior
         if (array_key_exists($name, $this->variationAttributeDefaultValueMap)) {
             return true;
         }
+        if ($this->owner == null) {
+            return false;
+        }
         $model = $this->getDefaultVariationModel();
         return is_object($model) && $model->hasAttribute($name);
     }
@@ -398,6 +405,9 @@ class VariationBehavior extends Behavior
     {
         if (parent::canSetProperty($name, $checkVars)) {
             return true;
+        }
+        if ($this->owner == null) {
+            return false;
         }
         $model = $this->getDefaultVariationModel();
         return is_object($model) && $model->hasAttribute($name);

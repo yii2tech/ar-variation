@@ -133,4 +133,13 @@ class VariationBehaviorTest extends TestCase
         $this->assertCount(1, $item->getVariationModels());
         $this->assertEquals(1, $item->getVariationModels()[0]->languageId);
     }
+
+    public function testInitWithWrongConfig()
+    {
+        $this->setExpectedException('yii\base\UnknownPropertyException');
+
+        $behavior = new VariationBehavior([
+            'unExistingProperty' => 'any'
+        ]);
+    }
 }
