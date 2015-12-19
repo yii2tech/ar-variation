@@ -145,6 +145,45 @@ class VariationBehaviorTest extends TestCase
     }
 
     /**
+     * @depends testSave
+     */
+    public function testVariationSaveFilter()
+    {
+        /* @var $item Item|VariationBehavior */
+
+        $item = new Item();
+        $item->name = 'new item';
+
+        foreach ($item->getVariationModels() as $variationModel) {
+            $variationModel->title = 'new title';
+            $variationModel->description = 'new description';
+        }
+
+        $item->variationSaveFilter = function ($model) {
+            return ($model->languageId != 1);
+        };
+        $item->save(false);
+
+        $item = Item::findOne($item->id);
+        $this->assertCount(1, $item->translations);
+        $this->assertEquals(2, $item->translations[0]->languageId);
+
+        foreach ($item->getVariationModels() as $variationModel) {
+            $variationModel->title = 'new title';
+            $variationModel->description = 'new description';
+        }
+
+        $item->variationSaveFilter = function ($model) {
+            return ($model->languageId != 2);
+        };
+        $item->save(false);
+
+        $item = Item::findOne($item->id);
+        $this->assertCount(1, $item->translations);
+        $this->assertEquals(1, $item->translations[0]->languageId);
+    }
+
+    /**
      * @depends testGetVariationModels
      */
     public function testDefaultVariationModelAttributes()

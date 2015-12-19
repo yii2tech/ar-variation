@@ -113,6 +113,18 @@ class VariationBehavior extends Behavior
      * If not set attributes will be automatically determined from the [[variationsRelation]] relation `where` condition.
      */
     public $variationModelDefaultAttributes;
+    /**
+     * @var callable|null PHP callback, which should determine whether particular variation model should be saved or not.
+     * Callable should have a following signature: `boolean function (\yii\db\BaseActiveRecord $model)`.
+     * For example:
+     *
+     * ```php
+     * function ($model) {
+     *     return !empty($model->title) || !empty($model->description);
+     * }
+     * ```
+     */
+    public $variationSaveFilter;
 
     /**
      * @var \yii\db\ActiveQueryInterface[]|null list of all possible variation models.
@@ -502,7 +514,13 @@ class VariationBehavior extends Behavior
         $variationModels = $this->getVariationModels();
         foreach ($variationModels as $variationModel) {
             $variationModel->{$ownerReferenceAttribute} = $this->owner->getPrimaryKey();
-            $variationModel->save(false);
+            if ($this->variationSaveFilter === null || call_user_func($this->variationSaveFilter, $variationModel)) {
+                $variationModel->save(false);
+            } else {
+                if (!$variationModel->getIsNewRecord()) {
+                    $variationModel->delete();
+                }
+            }
         }
     }
 }
