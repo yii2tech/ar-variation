@@ -107,6 +107,12 @@ class VariationBehavior extends Behavior
      * variation option primary key id.
      */
     public $defaultVariationOptionReference;
+    /**
+     * @var array|callable|null list of the attributes, which should be applied for newly created variation model.
+     * This could be a callable with the signature `function (\yii\db\BaseActiveRecord $model)` or array of attribute values.
+     * If not set attributes will be automatically determined from the [[variationsRelation]] relation `where` condition.
+     */
+    public $variationModelDefaultAttributes;
 
     /**
      * @var \yii\db\ActiveQueryInterface[]|null list of all possible variation models.
@@ -266,6 +272,7 @@ class VariationBehavior extends Behavior
                 $variationModel = new $variationClassName();
                 $variationModel->$optionReferenceAttribute = $option->getPrimaryKey();
                 $variationModel->$ownerReferenceAttribute = $this->owner->getPrimaryKey();
+                $this->fillUpVariationModelDefaults($variationModel);
                 $variationModels[] = $variationModel;
             }
         }
@@ -286,6 +293,37 @@ class VariationBehavior extends Behavior
         }
 
         return $variationModels;
+    }
+
+    /**
+     * Fills up default attributes for the variation model.
+     * @param BaseActiveRecord $variationModel model instance.
+     * @throws InvalidConfigException on invalid configuration.
+     */
+    private function fillUpVariationModelDefaults($variationModel)
+    {
+        if ($this->variationModelDefaultAttributes === null) {
+            $variationsRelation = $this->getVariationsRelation();
+            if (isset($variationsRelation->where)) {
+                foreach ((array)$variationsRelation->where as $attribute => $value) {
+                    if ($variationModel->hasAttribute($attribute)) {
+                        $variationModel->{$attribute} = $value;
+                    }
+                }
+            }
+            return;
+        }
+
+        if (is_callable($this->variationModelDefaultAttributes, true)) {
+            call_user_func($this->variationModelDefaultAttributes, $variationModel);
+            return;
+        }
+        if (!is_array($this->variationModelDefaultAttributes)) {
+            throw new InvalidConfigException('"' . get_class($this) . '::variationModelDefaultAttributes" must be a valid callable or an array.');
+        }
+        foreach ($this->variationModelDefaultAttributes as $attribute => $value) {
+            $variationModel->{$attribute} = $value;
+        }
     }
 
     /**

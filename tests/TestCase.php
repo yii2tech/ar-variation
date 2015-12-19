@@ -69,18 +69,18 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         // Structure :
 
-        $table = 'Item';
-        $columns = [
-            'id' => 'pk',
-            'name' => 'string',
-        ];
-        $db->createCommand()->createTable($table, $columns)->execute();
-
         $table = 'Language';
         $columns = [
             'id' => 'pk',
             'name' => 'string',
             'locale' => 'string',
+        ];
+        $db->createCommand()->createTable($table, $columns)->execute();
+
+        $table = 'Item';
+        $columns = [
+            'id' => 'pk',
+            'name' => 'string',
         ];
         $db->createCommand()->createTable($table, $columns)->execute();
 
@@ -91,6 +91,24 @@ class TestCase extends \PHPUnit_Framework_TestCase
             'title' => 'string',
             'description' => 'string',
             'PRIMARY KEY(itemId, languageId)'
+        ];
+        $db->createCommand()->createTable($table, $columns)->execute();
+
+        $table = 'Article';
+        $columns = [
+            'id' => 'pk',
+            'name' => 'string',
+        ];
+        $db->createCommand()->createTable($table, $columns)->execute();
+
+        $table = 'ArticleContent';
+        $columns = [
+            'id' => 'pk',
+            'articleId' => 'integer',
+            'languageId' => 'integer',
+            'censorType' => 'string',
+            'title' => 'string',
+            'content' => 'string',
         ];
         $db->createCommand()->createTable($table, $columns)->execute();
 

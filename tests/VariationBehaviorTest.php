@@ -3,6 +3,7 @@
 namespace yii2tech\tests\unit\ar\variation;
 
 use yii2tech\ar\variation\VariationBehavior;
+use yii2tech\tests\unit\ar\variation\data\Article;
 use yii2tech\tests\unit\ar\variation\data\Item;
 
 class VariationBehaviorTest extends TestCase
@@ -141,5 +142,27 @@ class VariationBehaviorTest extends TestCase
         $behavior = new VariationBehavior([
             'unExistingProperty' => 'any'
         ]);
+    }
+
+    /**
+     * @depends testGetVariationModels
+     */
+    public function testDefaultVariationModelAttributes()
+    {
+        /* @var $behavior VariationBehavior */
+
+        $model = new Article();
+
+        $behavior = $model->getBehavior('censoredContent');
+        $variationModels = $behavior->getVariationModels();
+        $this->assertEquals('censored', $variationModels[0]->censorType);
+
+        $behavior = $model->getBehavior('uncensoredContent');
+        $variationModels = $behavior->getVariationModels();
+        $this->assertEquals('no', $variationModels[0]->censorType);
+
+        $behavior = $model->getBehavior('callbackContent');
+        $variationModels = $behavior->getVariationModels();
+        $this->assertEquals('callback', $variationModels[0]->censorType);
     }
 }
