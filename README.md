@@ -428,7 +428,7 @@ record for it.
 You may use [[\yii2tech\ar\variation\VariationBehavior::variationSaveFilter]] to determine which variation record should
 be saved or not. For example:
 
-```
+```php
 class Developer extends ActiveRecord
 {
     public function behaviors()
