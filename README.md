@@ -36,13 +36,23 @@ Usage
 
 This extension provides support for ActiveRecord variation via related models.
 Variation means some particular entity have an attributes (fields), which values should vary depending on actual
-selected option.
+selected option. In database structure variation is implemented as many-to-many relation with extra columns at
+junction entity.
+
 The most common example of such case is i18n feature: imagine we have an item, which title and description should
 be provided on several different languages. In relational database there will be 2 different tables for this case:
 one for the item and second - for the item translation, which have item id and language id along with actual title
 and description. A DDL for such solution will be following:
 
 ```sql
+CREATE TABLE `Language`
+(
+   `id` varchar(5) NOT NULL,
+   `name` varchar(64) NOT NULL,
+   `locale` varchar(5) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE InnoDB;
+
 CREATE TABLE `Item`
 (
    `id` integer NOT NULL AUTO_INCREMENT,
@@ -76,7 +86,7 @@ class Item extends ActiveRecord
     public function behaviors()
     {
         return [
-            'translationBehavior' => [
+            'translations' => [
                 'class' => VariationBehavior::className(),
                 'variationsRelation' => 'translations',
                 'defaultVariationRelation' => 'defaultTranslation',
@@ -274,4 +284,168 @@ use yii\widgets\ActiveForm;
 </div>
 
 <?php ActiveForm::end(); ?>
+```
+
+
+## Additional variation conditions <span id="additional-variation-conditions"></span>
+
+There are case, when variation options or variation entities have extra filtering conditions or attributes.
+For example: assume we have a database of the developers with their payment rates, which varies per particular
+work type. Work types are grouped by categories: 'front-end', 'back-end', 'database' etc. And payment rates should
+be set for regular working time and for over-timing separately.
+The DDL for such use case can be following:
+
+```sql
+CREATE TABLE `Developer`
+(
+   `id` integer NOT NULL AUTO_INCREMENT,
+   `name` varchar(64) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE InnoDB;
+
+CREATE TABLE `WorkTypeGroup`
+(
+   `id` integer NOT NULL AUTO_INCREMENT,
+   `name` varchar(64) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE InnoDB;
+
+CREATE TABLE `WorkType`
+(
+   `id` integer NOT NULL AUTO_INCREMENT,
+   `name` varchar(64) NOT NULL,
+   `groupId` integer NOT NULL,
+    PRIMARY KEY (`id`)
+    FOREIGN KEY (`groupId`) REFERENCES `WorkTypeGroup` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+) ENGINE InnoDB;
+
+CREATE TABLE `DeveloperPaymentRate`
+(
+   `developerId` integer NOT NULL,
+   `workTypeId` varchar(5) NOT NULL,
+   `paymentRate` integer NOT NULL,
+   `isOvertime` integer(1) NOT NULL,
+    PRIMARY KEY (`developerId`, `workTypeId`)
+    FOREIGN KEY (`developerId`) REFERENCES `Developer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`workTypeId`) REFERENCES `WorkType` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+) ENGINE InnoDB;
+```
+
+In this case you may want to setup 'front-end' and 'back-end' separately (using different web interface or something).
+You can apply an extra filtering condition for the 'option' Active Record query using [[\yii2tech\ar\variation\VariationBehavior::optionQueryFilter]]:
+
+```php
+class Developer extends ActiveRecord
+{
+    public function behaviors()
+    {
+        return [
+            'frontEndPaymentRates' => [
+                'class' => VariationBehavior::className(),
+                'variationsRelation' => 'paymentRates',
+                'variationOptionReferenceAttribute' => 'workTypeId',
+                'optionModelClass' => WorkType::className(),
+                'optionQueryFilter' => [
+                    'groupId' => WorkType::GROUP_FRONT_END // add 'where' condition to the `WorkType` query
+                ],
+            ],
+            'backEndPaymentRates' => [
+                'class' => VariationBehavior::className(),
+                'variationsRelation' => 'paymentRates',
+                'variationOptionReferenceAttribute' => 'workTypeId',
+                'optionModelClass' => WorkType::className(),
+                // you can use a PHP callable as filter as well:
+                'optionQueryFilter' => function ($query) {
+                    $query->andWhere(['groupId' => WorkType::GROUP_BACK_END]);
+                }
+            ],
+        ];
+    }
+    // ...
+}
+```
+
+In this case you'll have to access `getVariationModels()` from the behavior instance rather then the owner directly:
+
+```php
+$developer = new Developer();
+$developer->getBehavior('frontEndPaymentRates')->getVariationModels(); // get 'front-end' payment rates
+$developer->getBehavior('backEndPaymentRates')->getVariationModels(); // get 'back-end' payment rates
+```
+
+You may as well separate variations using 'overtime' conditions: setup regular time and overtime payment rates in
+different process. For such purpose you'll have to declare 2 separated relations for 'regular time' and 'overtime'
+payment rates:
+
+```php
+class Developer extends ActiveRecord
+{
+    public function behaviors()
+    {
+        return [
+            'regularPaymentRates' => [
+                'class' => VariationBehavior::className(),
+                'variationsRelation' => 'regularPaymentRates',
+                'variationOptionReferenceAttribute' => 'workTypeId',
+                'optionModelClass' => WorkType::className(),
+            ],
+            'overtimePaymentRates' => [
+                'class' => VariationBehavior::className(),
+                'variationsRelation' => 'overtimePaymentRates',
+                'variationOptionReferenceAttribute' => 'workTypeId',
+                'optionModelClass' => WorkType::className(),
+            ],
+        ];
+    }
+
+    public function getPaymentRates()
+    {
+        return $this->hasMany(PaymentRates::className(), ['developerId' => 'id']); // basic 'payment rates' relation
+    }
+
+    public function getRegularPaymentRates()
+    {
+        return $this->getPaymentRates()->andWhere(['isOvertime' => false]); // regular payment rates
+    }
+
+    public function getOvertimePaymentRates()
+    {
+        return $this->getPaymentRates()->andWhere(['isOvertime' => true]); // overtime payment rates
+    }
+
+    // ...
+}
+```
+
+In this case variation will be loaded only for particular rate type and saved with corresponding value of the `isOvertime`
+flag attribute. However, automatic detection of the extra variation model attributes will work only for 'hash' query conditions.
+If you have a complex variation option filtering logic, you'll need to setup [[\yii2tech\ar\variation\VariationBehavior::variationModelDefaultAttributes]]
+manually.
+
+In the example above you may not want to save empty variation data in database: if particular developer have no particular
+'front-end' skill like 'AngularJS' he have no payment rate for it and thus there is no reason to save an empty 'PaymentRate'
+record for it.
+You may use [[\yii2tech\ar\variation\VariationBehavior::variationSaveFilter]] to determine which variation record should
+be saved or not. For example:
+
+```
+class Developer extends ActiveRecord
+{
+    public function behaviors()
+    {
+        return [
+            'paymentRates' => [
+                'class' => VariationBehavior::className(),
+                'variationsRelation' => 'regularPaymentRates',
+                'variationOptionReferenceAttribute' => 'workTypeId',
+                'optionModelClass' => WorkType::className(),
+                'variationSaveFilter' => function ($model) {
+                    return !empty($model->paymentRate);
+                },
+            ],
+        ];
+    }
+
+    // ...
+}
 ```

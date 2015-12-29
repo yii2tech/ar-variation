@@ -1,7 +1,7 @@
 {
     "name": "yii2tech/ar-variation",
     "description": "Provides support for ActiveRecord variation via related models in Yii2",
-    "keywords": ["yii2", "active", "record", "variation", "variator", "translation", "i18n"],
+    "keywords": ["yii2", "active", "record", "variation", "variator", "link", "many", "many-to-many", "many to many", "translation", "i18n"],
     "type": "yii2-extension",
     "license": "BSD-3-Clause",
     "support": {
