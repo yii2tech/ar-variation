@@ -10,6 +10,7 @@ namespace yii2tech\ar\variation;
 use yii\base\Behavior;
 use yii\base\InvalidConfigException;
 use yii\base\Model;
+use yii\base\NotSupportedException;
 use yii\base\UnknownPropertyException;
 use yii\db\BaseActiveRecord;
 
@@ -140,7 +141,19 @@ class VariationBehavior extends Behavior
     {
         $variationsRelation = $this->getVariationsRelation();
         $variationsRelation->multiple = false;
-        $variationsRelation->andWhere([$this->variationOptionReferenceAttribute => $this->getDefaultVariationOptionReference()]);
+        $condition = [$this->variationOptionReferenceAttribute => $this->getDefaultVariationOptionReference()];
+
+        if (method_exists($variationsRelation, 'andOnCondition')) {
+            try {
+                $variationsRelation->andOnCondition($condition);
+            } catch (NotSupportedException $exception) {
+                // particular ActiveQuery may extend `yii\db\ActiveQuery` but do not support `on` conditions
+                $variationsRelation->andWhere($condition);
+            }
+        } else {
+            $variationsRelation->andWhere($condition);
+        }
+
         return $variationsRelation;
     }
 

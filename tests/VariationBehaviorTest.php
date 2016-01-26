@@ -204,4 +204,15 @@ class VariationBehaviorTest extends TestCase
         $variationModels = $behavior->getVariationModels();
         $this->assertEquals('callback', $variationModels[0]->censorType);
     }
+
+    public function testLeftJoinWith()
+    {
+        $this->assertTrue(true);
+
+        $totalItemCount = (integer)Item::find()->count();
+        $items = Item::find()->joinWith('defaultTranslation')->all();
+
+        $this->assertCount($totalItemCount, $items);
+        $this->assertTrue($items[0]->isRelationPopulated('defaultTranslation'));
+    }
 }
