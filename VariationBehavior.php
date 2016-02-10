@@ -66,7 +66,7 @@ class VariationBehavior extends Behavior
     /**
      * @var string name of relation, which corresponds default variation.
      */
-    public $defaultVariationRelation = 'variation';
+    public $defaultVariationRelation;
     /**
      * @var array map, which marks the  a source for the default value for the variation model attributes.
      * Format: variationModelAttributeName => valueSource.
