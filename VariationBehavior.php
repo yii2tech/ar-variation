@@ -139,7 +139,7 @@ class VariationBehavior extends Behavior
      */
     public function hasDefaultVariationRelation()
     {
-        $variationsRelation = $this->getVariationsRelation();
+        $variationsRelation = $this->owner->getRelation($this->variationsRelation);
         $variationsRelation->multiple = false;
         $condition = [$this->variationOptionReferenceAttribute => $this->getDefaultVariationOptionReference()];
 
@@ -178,16 +178,6 @@ class VariationBehavior extends Behavior
     public function getDefaultVariationModel()
     {
         return $this->findDefaultVariationModel();
-    }
-
-    /**
-     * Returns the instance of the [[variationsRelation]] relation.
-     * @return \yii\db\ActiveQueryInterface|\yii\db\ActiveRelationTrait variations relation.
-     */
-    private function getVariationsRelation()
-    {
-        $relationMethod = 'get' . $this->variationsRelation;
-        return $this->owner->$relationMethod();
     }
 
     /**
@@ -273,7 +263,7 @@ class VariationBehavior extends Behavior
     {
         $options = $this->findOptionModels();
 
-        $variationsRelation = $this->getVariationsRelation();
+        $variationsRelation = $this->owner->getRelation($this->variationsRelation);
 
         $optionReferenceAttribute = $this->variationOptionReferenceAttribute;
         list($ownerReferenceAttribute) = array_keys($variationsRelation->link);
@@ -328,7 +318,7 @@ class VariationBehavior extends Behavior
     private function fillUpVariationModelDefaults($variationModel)
     {
         if ($this->variationModelDefaultAttributes === null) {
-            $variationsRelation = $this->getVariationsRelation();
+            $variationsRelation = $this->owner->getRelation($this->variationsRelation);
             if (isset($variationsRelation->where)) {
                 foreach ((array)$variationsRelation->where as $attribute => $value) {
                     if ($variationModel->hasAttribute($attribute)) {
@@ -521,7 +511,7 @@ class VariationBehavior extends Behavior
             return;
         }
 
-        $variationsRelation = $this->getVariationsRelation();
+        $variationsRelation = $this->owner->getRelation($this->variationsRelation);
         list($ownerReferenceAttribute) = array_keys($variationsRelation->link);
 
         $variationModels = $this->getVariationModels();
