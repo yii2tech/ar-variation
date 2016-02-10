@@ -1,8 +1,8 @@
 Yii 2 ActiveRecord Variation extension Change Log
 =================================================
 
-1.0.1 under development
------------------------
+1.0.1, February 10, 2016
+------------------------
 
 - Bug #13: Preset value for `VariationBehavior::defaultVariationRelation` removed (klimov-paul)
 - Bug #12: `VariationBehavior` does not use `ActiveRecord::getRelation()` while retrieving relation instance (klimov-paul)
