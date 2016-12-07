@@ -116,7 +116,7 @@ class VariationBehavior extends Behavior
     public $variationModelDefaultAttributes;
     /**
      * @var callable|null PHP callback, which should determine whether particular variation model should be saved or not.
-     * Callable should have a following signature: `boolean function (\yii\db\BaseActiveRecord $model)`.
+     * Callable should have a following signature: `bool function (\yii\db\BaseActiveRecord $model)`.
      * For example:
      *
      * ```php
@@ -231,7 +231,7 @@ class VariationBehavior extends Behavior
     }
 
     /**
-     * @return boolean whether the variation models have been initialized or not.
+     * @return bool whether the variation models have been initialized or not.
      */
     public function getIsVariationModelsInitialized()
     {

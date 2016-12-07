@@ -209,7 +209,7 @@ class VariationBehaviorTest extends TestCase
     {
         $this->assertTrue(true);
 
-        $totalItemCount = (integer)Item::find()->count();
+        $totalItemCount = (int)Item::find()->count();
         $items = Item::find()->joinWith('defaultTranslation')->all();
 
         $this->assertCount($totalItemCount, $items);

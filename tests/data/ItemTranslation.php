@@ -5,8 +5,8 @@ namespace yii2tech\tests\unit\ar\variation\data;
 use yii\db\ActiveRecord;
 
 /**
- * @property integer $itemId
- * @property integer $languageId
+ * @property int $itemId
+ * @property int $languageId
  * @property string $title
  * @property string $description
  */

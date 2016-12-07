@@ -6,7 +6,7 @@ use yii\db\ActiveRecord;
 use yii2tech\ar\variation\VariationBehavior;
 
 /**
- * @property integer $id
+ * @property int $id
  * @property string $name
  *
  * @property ItemTranslation[]|array $translations
