@@ -1,6 +1,12 @@
 Yii 2 ActiveRecord Variation extension Change Log
 =================================================
 
+1.0.2 under development
+-----------------------
+
+- Enh #16: Automatic creation and saving of default variation model provided (klimov-paul)
+
+
 1.0.1, February 10, 2016
 ------------------------
 
