@@ -144,7 +144,7 @@ echo $item->title; // equal to `$item->defaultTranslation->title`
 echo $item->description; // equal to `$item->defaultTranslation->description`
 ```
 
-If it could be the main entity don't have a variation for particular option, you can use [[\yii2tech\ar\variation\VariationBehavior::variationAttributeDefaultValueMap]]
+If it could be the main entity don't have a variation for particular option, you can use [[\yii2tech\ar\variation\VariationBehavior::$variationAttributeDefaultValueMap]]
 to provide the default value for the variation fields as it was done for 'title' in the above example:
 
 ```php
@@ -237,7 +237,7 @@ use yii\base\Model;
 use yii\web\Controller;
 use Yii;
 
-class ConfigController extends Controller
+class ItemController extends Controller
 {
     public function actionCreate()
     {
@@ -284,6 +284,118 @@ use yii\widgets\ActiveForm;
 </div>
 
 <?php ActiveForm::end(); ?>
+```
+
+
+## Saving default variation <span id="saving-default-variation"></span>
+
+It is not necessary to process all possible variations at once - you can operate only single variation model, validating
+and saving it. For example: you can provide a web interface where user can setup only the translation for the current language.
+Doing so it is better to setup [[\yii2tech\ar\variation\VariationBehavior::$variationAttributeDefaultValueMap]] value, allowing
+magic access to the variation attributes.
+Being fetched default variation model will be validated and saved along with the main model:
+
+```php
+$item = Item::findOne($id);
+
+$item->title = ''; // setup of `$item->defaultTranslation->title`
+var_dump($item->validate()); // outputs: `false`
+
+$item->title = 'new title';
+$item->save(); // invokes `$item->defaultTranslation->save()`
+```
+
+In case attribute in mentioned at this map it will be available for setting as well, even if default variation model
+does not exists: in such case it will be created automatically. For example:
+
+```php
+$item = new Item();
+$item->name = 'new name';
+$item->title = 'translation title'; // setup of `$item->defaultTranslation` attribute, creating default variation model
+$item->description = 'translation description';
+$item->save(); // saving both main model and default variation model
+```
+
+Marking variation attributes at the main model as 'safe' you can create a web interface, which sets up them in a simple way.
+Model code should look like following:
+
+```php
+class Item extends ActiveRecord
+{
+    public function behaviors()
+    {
+        return [
+            'translations' => [
+                'class' => VariationBehavior::className(),
+                // ...
+                'variationAttributeDefaultValueMap' => [
+                    'title' => 'name',
+                    'description' => null,
+                ],
+            ],
+        ];
+    }
+
+    public function rules()
+    {
+        return [
+            // ...
+            [['title', 'description'], 'safe'] // allow 'title' and 'description' to be populated via main model
+        ];
+    }
+
+    // ...
+}
+```
+
+Inside the view you can use variation attributes at the main model directly:
+
+```php
+<?php
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+
+/* @var $model Item */
+?>
+<?php $form = ActiveForm::begin(); ?>
+
+<?= $form->field($model, 'name'); ?>
+<?= $form->field($model, 'price'); ?>
+
+<?= $form->field($model, "title"); ?>
+<?= $form->field($model, "description")->textArea(); ?>
+
+<div class="form-group">
+    <?= Html::submitButton('Save', ['class' => 'btn btn-primary']) ?>
+</div>
+
+<?php ActiveForm::end(); ?>
+```
+
+Then the controller code will be simple:
+
+```php
+use yii\web\Controller;
+use Yii;
+
+class ItemController extends Controller
+{
+    public function actionCreate()
+    {
+        $model = new Item();
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            // variation attributes are populated automatically
+            // and variation model saved
+            return $this->redirect(['index']);
+        }
+
+        return $this->render('index', [
+            'model' => $model,
+        ]);
+    }
+}
 ```
 
 

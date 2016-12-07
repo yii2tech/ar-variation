@@ -69,11 +69,13 @@ class VariationBehavior extends Behavior
     public $defaultVariationRelation;
     /**
      * @var array map, which marks the  a source for the default value for the variation model attributes.
-     * Format: variationModelAttributeName => valueSource.
+     * Format: `variationModelAttributeName => valueSource`.
      * Each map value can be:
-     *  - null, - returns `null` as variation attribute value
-     *  - string, - returns value of the specified attribute from parent model as variation attribute value
-     *  - callable, - returns result of callback invocation as variation attribute value
+     *
+     * - null, returns `null` as variation attribute value
+     * - string, returns value of the specified attribute from parent model as variation attribute value
+     * - callable, returns result of callback invocation as variation attribute value
+     *
      * For example:
      *
      * ```php
@@ -87,6 +89,9 @@ class VariationBehavior extends Behavior
      *
      * Default value map will be used if default variation model not exists, or
      * its requested attribute value is empty.
+     *
+     * In case attribute in mentioned at this map it will be available for setting as well, even if
+     * default variation model does not exists: in such case it will be created automatically.
      */
     public $variationAttributeDefaultValueMap = [];
     /**
@@ -173,15 +178,22 @@ class VariationBehavior extends Behavior
     }
 
     /**
-     * @return BaseActiveRecord|null
+     * Returns default variation model, matching [[defaultVariationRelation]] relation
+     * @param bool $autoCreate whether to automatically create model - if it does not exist.
+     * @return BaseActiveRecord|null default variation model, `null` - if not found.
      */
-    public function getDefaultVariationModel()
+    public function getDefaultVariationModel($autoCreate = false)
     {
-        return $this->findDefaultVariationModel();
+        $model = $this->findDefaultVariationModel();
+        if ($autoCreate && !is_object($model)) {
+            return $this->createDefaultVariationModel();
+        }
+        return $model;
     }
 
     /**
-     * @return BaseActiveRecord|null
+     * Finds existing default variation model.
+     * @return BaseActiveRecord|null default variation model, `null` - if not found.
      */
     private function findDefaultVariationModel()
     {
@@ -199,6 +211,29 @@ class VariationBehavior extends Behavior
             }
         }
         return null;
+    }
+
+    /**
+     * Creates new instance for default variation model, populating [[defaultVariationRelation]] relation.
+     * @return BaseActiveRecord|null default variation model, `null` if creation is impossible.
+     * @since 1.0.2
+     */
+    private function createDefaultVariationModel()
+    {
+        if ($this->defaultVariationRelation === null) {
+            return null;
+        }
+
+        $relation = $this->owner->getRelation($this->defaultVariationRelation);
+        /* @var $modelClass BaseActiveRecord */
+        $modelClass = $relation->modelClass;
+        $model = new $modelClass();
+
+        $defaultOptionReference = $this->getDefaultVariationOptionReference();
+        $model->{$this->variationOptionReferenceAttribute} = $defaultOptionReference;
+
+        $this->owner->populateRelation($this->defaultVariationRelation, $model);
+        return $model;
     }
 
     /**
@@ -425,8 +460,8 @@ class VariationBehavior extends Behavior
             parent::__set($name, $value);
         } catch (UnknownPropertyException $exception) {
             if ($this->owner !== null) {
-                $model = $this->getDefaultVariationModel();
-                if ($model->hasAttribute($name)) {
+                $model = $this->getDefaultVariationModel(true);
+                if (is_object($model) && $model->hasAttribute($name)) {
                     $model->$name = $value;
                     return;
                 }
@@ -464,6 +499,9 @@ class VariationBehavior extends Behavior
         if ($this->owner == null) {
             return false;
         }
+        if (array_key_exists($name, $this->variationAttributeDefaultValueMap)) {
+            return true;
+        }
         $model = $this->getDefaultVariationModel();
         return is_object($model) && $model->hasAttribute($name);
     }
@@ -489,10 +527,14 @@ class VariationBehavior extends Behavior
      */
     public function afterValidate($event)
     {
-        if (!$this->getIsVariationModelsInitialized()) {
+        if ($this->getIsVariationModelsInitialized()) {
+            $variationModels = $this->getVariationModels();
+        } elseif ($this->defaultVariationRelation !== null && $this->owner->isRelationPopulated($this->defaultVariationRelation)) {
+            $variationModels = [$this->owner->{$this->defaultVariationRelation}];
+        } else {
             return;
         }
-        $variationModels = $this->getVariationModels();
+
         foreach ($variationModels as $variationModel) {
             if (!$variationModel->validate()) {
                 $this->owner->addErrors($variationModel->getErrors());
@@ -507,14 +549,17 @@ class VariationBehavior extends Behavior
      */
     public function afterSave($event)
     {
-        if (!$this->getIsVariationModelsInitialized()) {
+        if ($this->getIsVariationModelsInitialized()) {
+            $variationModels = $this->getVariationModels();
+        } elseif ($this->defaultVariationRelation !== null && $this->owner->isRelationPopulated($this->defaultVariationRelation)) {
+            $variationModels = [$this->owner->{$this->defaultVariationRelation}];
+        } else {
             return;
         }
 
         $variationsRelation = $this->owner->getRelation($this->variationsRelation);
         list($ownerReferenceAttribute) = array_keys($variationsRelation->link);
 
-        $variationModels = $this->getVariationModels();
         foreach ($variationModels as $variationModel) {
             $variationModel->{$ownerReferenceAttribute} = $this->owner->getPrimaryKey();
             if ($this->variationSaveFilter === null || call_user_func($this->variationSaveFilter, $variationModel)) {

@@ -215,4 +215,60 @@ class VariationBehaviorTest extends TestCase
         $this->assertCount($totalItemCount, $items);
         $this->assertTrue($items[0]->isRelationPopulated('defaultTranslation'));
     }
+
+    /**
+     * @depends testGetVariationAttributes
+     */
+    public function testSetVariationAttributes()
+    {
+        /* @var $model Item */
+        $model = Item::findOne(1);
+
+        $title = 'new title';
+        $model->title = $title;
+        $this->assertEquals($title, $model->defaultTranslation->title);
+
+        $model = new Item();
+
+        $title = 'new model title';
+        $model->title = $title;
+        $this->assertEquals($title, $model->defaultTranslation->title);
+        $this->assertNotEmpty($model->defaultTranslation->languageId);
+    }
+
+    /**
+     * @depends testValidate
+     * @depends testSetVariationAttributes
+     */
+    public function testValidateDefaultVariationModel()
+    {
+        $model = new Item();
+        $model->name = 'new item';
+
+        $model->title = 'new title';
+        $this->assertFalse($model->validate());
+
+        $model->title = 'new title';
+        $model->description = 'new description';
+        $this->assertTrue($model->validate());
+    }
+
+    /**
+     * @depends testSave
+     * @depends testValidateDefaultVariationModel
+     */
+    public function testSaveDefaultVariationModel()
+    {
+        $model = new Item();
+        $model->name = 'new item';
+        $model->title = 'new title';
+        $model->description = 'new description';
+
+        $model->save(false);
+
+        $model = Item::findOne($model->id);
+        $this->assertCount(1, $model->translations);
+
+        $this->assertEquals('new title', $model->title);
+    }
 }
