@@ -248,7 +248,7 @@ class ItemController extends Controller
             return $this->redirect(['index']);
         }
 
-        return $this->render('index', [
+        return $this->render('create', [
             'model' => $model,
         ]);
     }
@@ -305,8 +305,9 @@ $item->title = 'new title';
 $item->save(); // invokes `$item->defaultTranslation->save()`
 ```
 
-In case attribute in mentioned at this map it will be available for setting as well, even if default variation model
-does not exists: in such case it will be created automatically. For example:
+In case attribute in mentioned at [[\yii2tech\ar\variation\VariationBehavior::$variationAttributeDefaultValueMap]], it
+will be available for setting as well, even if default variation model does not exists: in such case it will be
+created automatically. For example:
 
 ```php
 $item = new Item();
@@ -364,7 +365,7 @@ use yii\widgets\ActiveForm;
 <?= $form->field($model, 'price'); ?>
 
 <?= $form->field($model, "title"); ?>
-<?= $form->field($model, "description")->textArea(); ?>
+<?= $form->field($model, "description")->textarea(); ?>
 
 <div class="form-group">
     <?= Html::submitButton('Save', ['class' => 'btn btn-primary']) ?>
@@ -391,7 +392,7 @@ class ItemController extends Controller
             return $this->redirect(['index']);
         }
 
-        return $this->render('index', [
+        return $this->render('create', [
             'model' => $model,
         ]);
     }
