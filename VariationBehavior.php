@@ -530,7 +530,11 @@ class VariationBehavior extends Behavior
         if ($this->getIsVariationModelsInitialized()) {
             $variationModels = $this->getVariationModels();
         } elseif ($this->defaultVariationRelation !== null && $this->owner->isRelationPopulated($this->defaultVariationRelation)) {
-            $variationModels = [$this->owner->{$this->defaultVariationRelation}];
+            $defaultVariationModel = $this->owner->{$this->defaultVariationRelation};
+            if (!is_object($defaultVariationModel)) {
+                return;
+            }
+            $variationModels = [$defaultVariationModel];
         } else {
             return;
         }
@@ -552,6 +556,10 @@ class VariationBehavior extends Behavior
         if ($this->getIsVariationModelsInitialized()) {
             $variationModels = $this->getVariationModels();
         } elseif ($this->defaultVariationRelation !== null && $this->owner->isRelationPopulated($this->defaultVariationRelation)) {
+            $defaultVariationModel = $this->owner->{$this->defaultVariationRelation};
+            if (!is_object($defaultVariationModel)) {
+                return;
+            }
             $variationModels = [$this->owner->{$this->defaultVariationRelation}];
         } else {
             return;

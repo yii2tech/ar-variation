@@ -1,6 +1,12 @@
 Yii 2 ActiveRecord Variation extension Change Log
 =================================================
 
+1.0.3 under development
+-----------------------
+
+- Bug #17: Fixed owner validation and saving fails, if default variation relation is initialized with `null` (klimov-paul)
+
+
 1.0.2, December 8, 2016
 -----------------------
 

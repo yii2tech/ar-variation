@@ -270,5 +270,11 @@ class VariationBehaviorTest extends TestCase
         $this->assertCount(1, $model->translations);
 
         $this->assertEquals('new title', $model->title);
+
+        $model = new Item();
+        $model->name = 'new item';
+        $model->defaultTranslation; // initialize empty variation
+        $this->assertTrue($model->validate()); // no error
+        $this->assertTrue($model->save(false)); // no error
     }
 }
