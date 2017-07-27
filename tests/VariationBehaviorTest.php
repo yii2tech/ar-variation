@@ -26,7 +26,7 @@ class VariationBehaviorTest extends TestCase
         $this->assertEmpty($item->defaultTranslation);
         $this->assertNull($item->brief);
         $this->assertEquals('default', $item->summary);
-        $this->setExpectedException('yii\base\UnknownPropertyException');
+        $this->expectException('yii\base\UnknownPropertyException');
         $item->description;
     }
 
@@ -137,7 +137,7 @@ class VariationBehaviorTest extends TestCase
 
     public function testInitWithWrongConfig()
     {
-        $this->setExpectedException('yii\base\UnknownPropertyException');
+        $this->expectException('yii\base\UnknownPropertyException');
 
         $behavior = new VariationBehavior([
             'unExistingProperty' => 'any'

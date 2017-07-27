@@ -1,5 +1,10 @@
-ActiveRecord Variation Extension for Yii 2
-==========================================
+<p align="center">
+    <a href="https://github.com/yii2tech" target="_blank">
+        <img src="https://avatars2.githubusercontent.com/u/12951949" height="100px">
+    </a>
+    <h1 align="center">ActiveRecord Variation Extension for Yii 2</h1>
+    <br>
+</p>
 
 This extension provides support for ActiveRecord variation via related models.
 In particular it allows implementing i18n feature for ActiveRecord.
