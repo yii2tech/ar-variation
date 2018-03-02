@@ -136,6 +136,12 @@ class VariationBehavior extends Behavior
      * @var \yii\db\ActiveQueryInterface[]|null list of all possible variation models.
      */
     private $_variationModels;
+    /**
+     * @var array backup of value of the records related via variation relations in format: `[relationName => models]`.
+     * Backup is performed at the [[beforeSave()]] to bypass [[BaseActiveRecord::resetDependentRelations()]] later.
+     * @since 1.0.4
+     */
+    private $_variationRelationsBackup = [];
 
 
     /**
@@ -515,6 +521,8 @@ class VariationBehavior extends Behavior
     {
         return [
             Model::EVENT_AFTER_VALIDATE => 'afterValidate',
+            BaseActiveRecord::EVENT_BEFORE_INSERT => 'beforeSave',
+            BaseActiveRecord::EVENT_BEFORE_UPDATE => 'beforeSave',
             BaseActiveRecord::EVENT_AFTER_INSERT => 'afterSave',
             BaseActiveRecord::EVENT_AFTER_UPDATE => 'afterSave',
         ];
@@ -547,12 +555,36 @@ class VariationBehavior extends Behavior
     }
 
     /**
+     * Handles owner 'beforeInsert' and 'beforeUpdate' events, preparing backup for variation relations.
+     * @param \yii\base\ModelEvent $event event instance.
+     * @since 1.0.4
+     */
+    public function beforeSave($event)
+    {
+        // Backup to bypass [[BaseActiveRecord::resetDependentRelations()]] :
+        $this->_variationRelationsBackup = [];
+        if ($this->owner->isRelationPopulated($this->variationsRelation)) {
+            $this->_variationRelationsBackup[$this->variationsRelation] = $this->owner->{$this->variationsRelation};
+        }
+        if ($this->owner->isRelationPopulated($this->defaultVariationRelation)) {
+            $this->_variationRelationsBackup[$this->defaultVariationRelation] = $this->owner->{$this->defaultVariationRelation};
+        }
+    }
+
+    /**
      * Handles owner 'afterInsert' and 'afterUpdate' events, ensuring variation models are saved
      * in case they have been fetched before.
      * @param \yii\base\Event $event event instance.
      */
     public function afterSave($event)
     {
+        // Apply backup :
+        foreach ($this->_variationRelationsBackup as $relationName => $models) {
+            if (!$this->owner->isRelationPopulated($relationName)) {
+                $this->owner->populateRelation($relationName, $models);
+            }
+        }
+
         if ($this->getIsVariationModelsInitialized()) {
             $variationModels = $this->getVariationModels();
         } elseif ($this->defaultVariationRelation !== null && $this->owner->isRelationPopulated($this->defaultVariationRelation)) {

@@ -1,6 +1,12 @@
 Yii 2 ActiveRecord Variation extension Change Log
 =================================================
 
+1.0.4 under development
+-----------------------
+
+- Bug #20: Fixed variation relations are not saved in case using Yii 2.0.14 (klimov-paul)
+
+
 1.0.3, December 23, 2016
 ------------------------
 
