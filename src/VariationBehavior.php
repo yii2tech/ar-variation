@@ -25,12 +25,12 @@ use yii\db\BaseActiveRecord;
  *     public function behaviors()
  *     {
  *         return [
- *             'translationBehavior' => [
- *                 'class' => VariationBehavior::className(),
+ *             'translation' => [
+ *                 '__class' => VariationBehavior::class,
  *                 'variationsRelation' => 'translations',
  *                 'defaultVariationRelation' => 'defaultTranslation',
  *                 'variationOptionReferenceAttribute' => 'languageId',
- *                 'optionModelClass' => Language::className(),
+ *                 'optionModelClass' => Language::class,
  *                 'defaultVariationOptionReference' => 1,
  *                 'variationAttributeDefaultValueMap' => [
  *                     'title' => 'name'
@@ -41,7 +41,7 @@ use yii\db\BaseActiveRecord;
  *
  *     public function getTranslations()
  *     {
- *         return $this->hasMany(ItemTranslation::className(), ['itemId' => 'id']);
+ *         return $this->hasMany(ItemTranslation::class, ['itemId' => 'id']);
  *     }
  *
  *     public function getDefaultTranslation()

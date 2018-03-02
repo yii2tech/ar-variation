@@ -92,11 +92,11 @@ class Item extends ActiveRecord
     {
         return [
             'translations' => [
-                'class' => VariationBehavior::className(),
+                '__class' => VariationBehavior::class,
                 'variationsRelation' => 'translations',
                 'defaultVariationRelation' => 'defaultTranslation',
                 'variationOptionReferenceAttribute' => 'languageId',
-                'optionModelClass' => Language::className(),
+                'optionModelClass' => Language::class,
                 'defaultVariationOptionReference' => function() {return Yii::$app->language;},
                 'variationAttributeDefaultValueMap' => [
                     'title' => 'name'
@@ -115,7 +115,7 @@ class Item extends ActiveRecord
      */
     public function getTranslations()
     {
-        return $this->hasMany(ItemTranslation::className(), ['itemId' => 'id']);
+        return $this->hasMany(ItemTranslation::class, ['itemId' => 'id']);
     }
 
     /**
@@ -268,7 +268,6 @@ The form view file can be following:
 
 ```php
 <?php
-use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -332,7 +331,7 @@ class Item extends ActiveRecord
     {
         return [
             'translations' => [
-                'class' => VariationBehavior::className(),
+                '__class' => VariationBehavior::class,
                 // ...
                 'variationAttributeDefaultValueMap' => [
                     'title' => 'name',
@@ -358,7 +357,6 @@ Inside the view you can use variation attributes at the main model directly:
 
 ```php
 <?php
-use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -459,19 +457,19 @@ class Developer extends ActiveRecord
     {
         return [
             'frontEndPaymentRates' => [
-                'class' => VariationBehavior::className(),
+                '__class' => VariationBehavior::class,
                 'variationsRelation' => 'paymentRates',
                 'variationOptionReferenceAttribute' => 'workTypeId',
-                'optionModelClass' => WorkType::className(),
+                'optionModelClass' => WorkType::class,
                 'optionQueryFilter' => [
                     'groupId' => WorkType::GROUP_FRONT_END // add 'where' condition to the `WorkType` query
                 ],
             ],
             'backEndPaymentRates' => [
-                'class' => VariationBehavior::className(),
+                '__class' => VariationBehavior::class,
                 'variationsRelation' => 'paymentRates',
                 'variationOptionReferenceAttribute' => 'workTypeId',
-                'optionModelClass' => WorkType::className(),
+                'optionModelClass' => WorkType::class,
                 // you can use a PHP callable as filter as well:
                 'optionQueryFilter' => function ($query) {
                     $query->andWhere(['groupId' => WorkType::GROUP_BACK_END]);
@@ -502,23 +500,23 @@ class Developer extends ActiveRecord
     {
         return [
             'regularPaymentRates' => [
-                'class' => VariationBehavior::className(),
+                '__class' => VariationBehavior::class,
                 'variationsRelation' => 'regularPaymentRates',
                 'variationOptionReferenceAttribute' => 'workTypeId',
-                'optionModelClass' => WorkType::className(),
+                'optionModelClass' => WorkType::class,
             ],
             'overtimePaymentRates' => [
-                'class' => VariationBehavior::className(),
+                '__class' => VariationBehavior::class,
                 'variationsRelation' => 'overtimePaymentRates',
                 'variationOptionReferenceAttribute' => 'workTypeId',
-                'optionModelClass' => WorkType::className(),
+                'optionModelClass' => WorkType::class,
             ],
         ];
     }
 
     public function getPaymentRates()
     {
-        return $this->hasMany(PaymentRates::className(), ['developerId' => 'id']); // basic 'payment rates' relation
+        return $this->hasMany(PaymentRates::class, ['developerId' => 'id']); // basic 'payment rates' relation
     }
 
     public function getRegularPaymentRates()
@@ -553,10 +551,10 @@ class Developer extends ActiveRecord
     {
         return [
             'paymentRates' => [
-                'class' => VariationBehavior::className(),
+                '__class' => VariationBehavior::class,
                 'variationsRelation' => 'regularPaymentRates',
                 'variationOptionReferenceAttribute' => 'workTypeId',
-                'optionModelClass' => WorkType::className(),
+                'optionModelClass' => WorkType::class,
                 'variationSaveFilter' => function ($model) {
                     return !empty($model->paymentRate);
                 },

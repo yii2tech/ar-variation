@@ -22,25 +22,25 @@ class Article extends ActiveRecord
     {
         return [
             'censoredContent' => [
-                'class' => VariationBehavior::className(),
+                '__class' => VariationBehavior::class,
                 'variationsRelation' => 'censoredContents',
                 'variationOptionReferenceAttribute' => 'languageId',
-                'optionModelClass' => Language::className(),
+                'optionModelClass' => Language::class,
             ],
             'uncensoredContent' => [
-                'class' => VariationBehavior::className(),
+                '__class' => VariationBehavior::class,
                 'variationsRelation' => 'uncensoredContents',
                 'variationOptionReferenceAttribute' => 'languageId',
-                'optionModelClass' => Language::className(),
+                'optionModelClass' => Language::class,
                 'variationModelDefaultAttributes' => [
                     'censorType' => 'no'
                 ],
             ],
             'callbackContent' => [
-                'class' => VariationBehavior::className(),
+                '__class' => VariationBehavior::class,
                 'variationsRelation' => 'uncensoredContents',
                 'variationOptionReferenceAttribute' => 'languageId',
-                'optionModelClass' => Language::className(),
+                'optionModelClass' => Language::class,
                 'variationModelDefaultAttributes' => function ($model) {
                     $model->censorType = 'callback';
                 },
@@ -71,7 +71,7 @@ class Article extends ActiveRecord
      */
     public function getContents()
     {
-        return $this->hasMany(ArticleContent::className(), ['articleId' => 'id']);
+        return $this->hasMany(ArticleContent::class, ['articleId' => 'id']);
     }
 
     /**
