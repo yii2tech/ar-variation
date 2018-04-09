@@ -7,8 +7,8 @@ Yii 2 ActiveRecord Variation extension Change Log
 - Chg: Required Yii framework version has been raised to '2.1.0' (klimov-paul)
 
 
-1.0.4 under development
------------------------
+1.0.4, April 9, 2018
+--------------------
 
 - Bug #20: Fixed variation relations are not saved in case using Yii 2.0.14 (klimov-paul)
 
