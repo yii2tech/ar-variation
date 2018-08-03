@@ -13,6 +13,7 @@ use yii\base\Model;
 use yii\base\NotSupportedException;
 use yii\base\UnknownPropertyException;
 use yii\db\BaseActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * VariationBehavior provides support for ActiveRecord variation via related models.
@@ -408,7 +409,7 @@ class VariationBehavior extends Behavior
      */
     private function fetchVariationAttributeDefaultValue($name)
     {
-        $default = $this->variationAttributeDefaultValueMap[$name];
+        $default = ArrayHelper::getValue($this->variationAttributeDefaultValueMap, $name);
         if ($default === null) {
             return null;
         }
