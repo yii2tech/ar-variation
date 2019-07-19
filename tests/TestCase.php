@@ -77,10 +77,27 @@ class TestCase extends \PHPUnit\Framework\TestCase
         ];
         $db->createCommand()->createTable($table, $columns)->execute();
 
+        $table = 'Category';
+        $columns = [
+            'id' => 'pk',
+            'name' => 'string',
+        ];
+        $db->createCommand()->createTable($table, $columns)->execute();
+
+        $table = 'CategoryTranslation';
+        $columns = [
+            'categoryId' => 'integer',
+            'languageId' => 'integer',
+            'title' => 'string',
+            'PRIMARY KEY(categoryId, languageId)'
+        ];
+        $db->createCommand()->createTable($table, $columns)->execute();
+
         $table = 'Item';
         $columns = [
             'id' => 'pk',
             'name' => 'string',
+            'categoryId' => 'integer',
         ];
         $db->createCommand()->createTable($table, $columns)->execute();
 
@@ -119,9 +136,21 @@ class TestCase extends \PHPUnit\Framework\TestCase
             ['German', 'de'],
         ])->execute();
 
-        $db->createCommand()->batchInsert('Item', ['name'], [
-            ['item1'],
-            ['item2'],
+        $db->createCommand()->batchInsert('Category', ['name'], [
+            ['category1'],
+            ['category2'],
+        ])->execute();
+
+        $db->createCommand()->batchInsert('CategoryTranslation', ['categoryId', 'languageId', 'title'], [
+            [1, 1, 'category1-en'],
+            [1, 2, 'category1-de'],
+            [2, 1, 'category2-en'],
+            [2, 2, 'category2-de'],
+        ])->execute();
+
+        $db->createCommand()->batchInsert('Item', ['name', 'categoryId'], [
+            ['item1', 1],
+            ['item2', 2],
         ])->execute();
 
         $db->createCommand()->batchInsert('ItemTranslation', ['itemId', 'languageId', 'title', 'description'], [

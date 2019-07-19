@@ -8,13 +8,11 @@ use yii2tech\ar\variation\VariationBehavior;
 /**
  * @property int $id
  * @property string $name
- * @property int $categoryId
  *
- * @property Category|null $category
- * @property ItemTranslation[]|array $translations
- * @property ItemTranslation|null $defaultTranslation
+ * @property CategoryTranslation[]|array $translations
+ * @property CategoryTranslation|null $defaultTranslation
  */
-class Item extends ActiveRecord
+class Category extends ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -31,8 +29,6 @@ class Item extends ActiveRecord
                 'defaultVariationOptionReference' => 1,
                 'variationAttributeDefaultValueMap' => [
                     'title' => 'name',
-                    'brief' => null,
-                    'summary' => function() {return 'default';},
                 ],
             ],
         ];
@@ -43,7 +39,7 @@ class Item extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'Item';
+        return 'Category';
     }
 
     /**
@@ -52,7 +48,6 @@ class Item extends ActiveRecord
     public function rules()
     {
         return [
-            ['categoryId', 'integer'],
             ['name', 'required'],
         ];
     }
@@ -60,17 +55,9 @@ class Item extends ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCategory()
-    {
-        return $this->hasMany(Category::className(), ['id' => 'categoryId']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
     public function getTranslations()
     {
-        return $this->hasMany(ItemTranslation::className(), ['itemId' => 'id']);
+        return $this->hasMany(CategoryTranslation::className(), ['categoryId' => 'id']);
     }
 
     /**

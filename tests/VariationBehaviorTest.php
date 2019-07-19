@@ -277,4 +277,25 @@ class VariationBehaviorTest extends TestCase
         $this->assertTrue($model->validate()); // no error
         $this->assertTrue($model->save(false)); // no error
     }
+
+    /**
+     * @see https://github.com/yii2tech/ar-variation/issues/24
+     *
+     * @depends testLeftJoinWith
+     */
+    public function testLeftJoinWithAmbiguousColumn()
+    {
+        /* @var $items Item[] */
+
+        $items = Item::find()
+            ->joinWith([
+                'defaultTranslation',
+                'category' => function ($query) {
+                    $query->innerJoinWith('defaultTranslation');
+                },
+            ])
+            ->all();
+
+        $this->assertCount(2, $items);
+    }
 }

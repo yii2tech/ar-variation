@@ -154,6 +154,8 @@ class VariationBehavior extends Behavior
         $variationsRelation->multiple = false;
         $condition = [$this->variationOptionReferenceAttribute => $this->getDefaultVariationOptionReference()];
 
+        $condition = $this->normalizeQueryFilterCondition($variationsRelation, $condition);
+
         if (method_exists($variationsRelation, 'andOnCondition')) {
             try {
                 $variationsRelation->andOnCondition($condition);
@@ -419,6 +421,36 @@ class VariationBehavior extends Behavior
             return call_user_func($default, $this->owner);
         }
         return $this->owner->{$default};
+    }
+
+    /**
+     * Normalizes raw filter condition, adding table alias for relation database query.
+     * @param \yii\db\ActiveQueryInterface $query active query instance.
+     * @param array $condition raw filter condition.
+     * @return array normalized condition.
+     * @since 1.0.5
+     */
+    private function normalizeQueryFilterCondition($query, $condition)
+    {
+        if (method_exists($query, 'getTablesUsedInFrom')) {
+            $fromTables = $query->getTablesUsedInFrom();
+            $alias = array_keys($fromTables)[0];
+
+            foreach ($condition as $attribute => $value) {
+                if (is_numeric($attribute) || strpos($attribute, '.') !== false) {
+                    continue;
+                }
+
+                unset($condition[$attribute]);
+                if (strpos($attribute, '[[') === false) {
+                    $attribute = '[[' . $attribute . ']]';
+                }
+                $attribute = $alias . '.' . $attribute;
+                $condition[$attribute] = $value;
+            }
+        }
+
+        return $condition;
     }
 
     // Property Access Extension:
