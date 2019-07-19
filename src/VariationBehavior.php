@@ -103,9 +103,9 @@ class VariationBehavior extends Behavior
      */
     public $optionModelClass;
     /**
-     * @var mixed|callable additional filter to be applied to the DB query used to find [[optionModelClass]] instances.
+     * @var mixed|callable additional filter to be applied to the DB query used to find {@see optionModelClass} instances.
      * This could be a callable with the signature `function (\yii\db\QueryInterface $query)`, or a direct filter condition
-     * for the [[\yii\db\QueryInterface::where()]] method.
+     * for the {@see \yii\db\QueryInterface::where()} method.
      */
     public $optionQueryFilter;
     /**
@@ -116,7 +116,7 @@ class VariationBehavior extends Behavior
     /**
      * @var array|callable|null list of the attributes, which should be applied for newly created variation model.
      * This could be a callable with the signature `function (\yii\db\BaseActiveRecord $model)` or array of attribute values.
-     * If not set attributes will be automatically determined from the [[variationsRelation]] relation `where` condition.
+     * If not set attributes will be automatically determined from the {@see variationsRelation} relation `where` condition.
      */
     public $variationModelDefaultAttributes;
     /**
@@ -138,14 +138,14 @@ class VariationBehavior extends Behavior
     private $_variationModels;
     /**
      * @var array backup of value of the records related via variation relations in format: `[relationName => models]`.
-     * Backup is performed at the [[beforeSave()]] to bypass [[BaseActiveRecord::resetDependentRelations()]] later.
+     * Backup is performed at the {@see beforeSave()} to bypass {@see BaseActiveRecord::resetDependentRelations()} later.
      * @since 1.0.4
      */
     private $_variationRelationsBackup = [];
 
 
     /**
-     * Declares has-one relation [[defaultVariationRelation]] from [[variationsRelation]] relation.
+     * Declares has-one relation {@see defaultVariationRelation} from {@see variationsRelation} relation.
      * @return \yii\db\ActiveQueryInterface the relational query object.
      */
     public function hasDefaultVariationRelation()
@@ -172,7 +172,7 @@ class VariationBehavior extends Behavior
 
     /**
      * @return mixed default variation option reference value.
-     * @throws InvalidConfigException on empty [[defaultVariationOptionReference]]
+     * @throws InvalidConfigException on empty {@see defaultVariationOptionReference}
      */
     public function getDefaultVariationOptionReference()
     {
@@ -186,7 +186,7 @@ class VariationBehavior extends Behavior
     }
 
     /**
-     * Returns default variation model, matching [[defaultVariationRelation]] relation
+     * Returns default variation model, matching {@see defaultVariationRelation} relation.
      * @param bool $autoCreate whether to automatically create model - if it does not exist.
      * @return BaseActiveRecord|null default variation model, `null` - if not found.
      */
@@ -222,7 +222,7 @@ class VariationBehavior extends Behavior
     }
 
     /**
-     * Creates new instance for default variation model, populating [[defaultVariationRelation]] relation.
+     * Creates new instance for default variation model, populating {@see defaultVariationRelation} relation.
      * @return BaseActiveRecord|null default variation model, `null` if creation is impossible.
      * @since 1.0.2
      */
@@ -283,7 +283,7 @@ class VariationBehavior extends Behavior
 
     /**
      * Returns variation model, matching given option primary key.
-     * Note: this method will load [[variationsRelation]] relation fully.
+     * Note: this method will load {@see variationsRelation} relation fully.
      * @param mixed $optionPk option entity primary key.
      * @return BaseActiveRecord|null variation model.
      */
@@ -298,9 +298,9 @@ class VariationBehavior extends Behavior
     }
 
     /**
-     * Adjusts given variation models to be adequate to the [[optionModelClass]] records.
+     * Adjusts given variation models to be adequate to the {@see optionModelClass} records.
      * @param BaseActiveRecord[] $initialVariationModels set of initial variation models, found by relation
-     * @return BaseActiveRecord[] list of [[BaseActiveRecord]]
+     * @return BaseActiveRecord[] list of {@see BaseActiveRecord}
      */
     private function adjustVariationModels(array $initialVariationModels)
     {
@@ -593,7 +593,7 @@ class VariationBehavior extends Behavior
      */
     public function beforeSave($event)
     {
-        // Backup to bypass [[BaseActiveRecord::resetDependentRelations()]] :
+        // Backup to bypass {@see BaseActiveRecord::resetDependentRelations()} :
         $this->_variationRelationsBackup = [];
         if ($this->owner->isRelationPopulated($this->variationsRelation)) {
             $this->_variationRelationsBackup[$this->variationsRelation] = $this->owner->{$this->variationsRelation};
