@@ -1,8 +1,8 @@
 Yii 2 ActiveRecord Variation extension Change Log
 =================================================
 
-1.0.5 under development
------------------------
+1.0.5, July 30, 2019
+--------------------
 
 - Bug #24: Fix ambiguous column error while joining multiple `VariationBehavior::$defaultVariationRelation` (klimov-paul)
 
